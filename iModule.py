@@ -5,7 +5,16 @@ import heapq
 import threading
 from scapy.all import *
 import pexpect
+import Queue
+import iState
+import copy
 
+class SendState:
+    def __init__(self):
+        self.exitFlag = 0;
+        self.lastRecv = 0;
+
+    
 
 class PriorityQueue:
     def __init__(self):
@@ -21,27 +30,27 @@ class PriorityQueue:
 
 class send_syn(threading.Thread):
     '''send dport=23 package'''
-    def __init__(self, filename):
+    def __init__(self, filename, st):
         threading.Thread.__init__(self)
         self._ip_list = []
         self.read_ip(self, filename)
+        self.st = st
 
     def run(self):
-        global exitFlag
         print "Start to ip splitting"
         pkt = IP()/TCP(sport = 2222, dport=[23], flags="S")
-        for ip in self._ip:
-            pkt[IP].dst = num2ip(ip)
+        for ip in self._ip_list:
+            pkt[IP].dst = ip2num(ip)
             try:
                 send(pkt, verbose = 0)
             except:
                 pass
-        exitFlag = 1
+        st.exitFlag = 1
     
     def read_ip(self, filename):
         ip_f = open(filename, 'r')
         for line in ip_f.readlines():
-            _ip_list.append(line.strip())
+            self._ip_list.append(line.strip())
 
 class sniffer(threading.Thread):
     '''receive sport=2222 package'''
@@ -55,27 +64,29 @@ class sniffer(threading.Thread):
 
 class Scanner(threading.Thread):
     def __init__(self):
-        threading.Thread.__init__(self)
+        threading.Thread.__init__(self, st)
         self.queue = queue
+        self.queue_locker = threading.Lock()
+        self.st = st
 
     def run(self):
         print "starting scanner threading..."
         while True:
             ip_port = None
-            queueLocker.acquire()
-            if self.queue.empty() and exitFlag == 2 or exitFlag == 3:
-                queueLocker.release()
-                exitFlag = 3
+            self.queue_locker.acquire()
+            if self.queue.empty() and st.exitFlag == 2 or st.exitFlag == 3:
+                self.queueLocker.release()
+                st.exitFlag = 3
                 break
             elif self.queue.empty():
-                queueLocker.release()
+                self.queue_locker.release()
                 time.sleep(3)
                 continue
             try:
                 ip_port = self.queue.get(block=False)
             except:
                 pass
-            queueLocker.release()
+            self.queue_locker.release()
             if ip_port:
                 pass
             else:
@@ -83,7 +94,7 @@ class Scanner(threading.Thread):
                 continue
             
             #password guessing
-            con = Connection(copy.deepcopy(ip_port), copy.deepcopy(auth_queue))
+            con = iState.Connection(copy.deepcopy(ip_port), copy.deepcopy(auth_queue))
             while con._state:
                 con.run()
             

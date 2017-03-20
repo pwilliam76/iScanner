@@ -2,15 +2,11 @@
 #encoding:utf-8
 
 import pexpect
-import MySQLdb
 import heapq
 import datetime
 import time
-import threading
-from random import choice
 import Queue
 import sys
-import scapy
 from collections import deque
 
 import iModule
@@ -52,7 +48,8 @@ auth_table = [  ("user","password",10),
                 ("root","system",1)]
 
 auth_queue = iModule.PriorityQueue()
-
+ip_prompt_queue = deque(maxlen = 100)
+queue = Queue.Queue()
 
 def ip2num(ip, bigendian = True):
     ip = [int(x) for x in ip.split('.')]
@@ -72,8 +69,9 @@ def start():
     scanner_list = []
     start_time = datetime.now()
     send_syn_thread = iModule.send_syn(sys.argv[1])
+    state = iModule.SendState()
     try:
-        send_syn_thread.start()
+        send_syn_thread.start(argv[1], state)
     except:
         print "[Error] Start ip_split failed!"
         sys.exit()
@@ -87,7 +85,7 @@ def start():
         sys.exit()
 
     for i in range(int(sys.argv[2])):
-        t = iModule.Scanner()
+        t = iModule.Scanner(state)
         try:
             t.start()
         except:
@@ -95,12 +93,10 @@ def start():
         scanner_list.appent(t)
 
     while True:
-        global exitFlag
-        global lastRecv
         time.sleep(1)
-        if time.time() - lastRecv > 30 and exitFlag == 1:
-            exitFlag = 2
-        elif exitFlag == 3:
+        if time.time() - state.lastRecv > 30 and state.exitFlag == 1:
+            state.exitFlag = 2
+        elif state.exitFlag == 3:
             end_time = datetime.now()
             print "iScanner completes..."
             print "It totally costs: %d seconds..." % (end_time-start_time).seconds
@@ -128,4 +124,5 @@ if __name__ == "__main__":
     
     for item in auth_table:
         auth_queue.push(item[0:2], item[-1])
+        
     Start()
