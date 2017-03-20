@@ -5,6 +5,7 @@ import pexpect
 import MySQLdb
 import heapq
 import datetime
+import time
 import threading
 from random import choice
 import Queue
@@ -13,6 +14,7 @@ import scapy
 from collections import deque
 
 import iModule
+import iState
 
 
 try:
@@ -49,6 +51,9 @@ auth_table = [  ("user","password",10),
                 ("root","zlxx.",1),
                 ("root","system",1)]
 
+auth_queue = iModule.PriorityQueue()
+
+
 def ip2num(ip, bigendian = True):
     ip = [int(x) for x in ip.split('.')]
     return ip[0] << 24 | ip[1] << 16 | ip[2] << 8 | ip[3] & 0xffffffff
@@ -66,14 +71,14 @@ def start():
     '''Init threads'''
     scanner_list = []
     start_time = datetime.now()
-    send_syn_thread = send_syn(sys.argv[1])
+    send_syn_thread = iModule.send_syn(sys.argv[1])
     try:
         send_syn_thread.start()
     except:
         print "[Error] Start ip_split failed!"
         sys.exit()
 
-    sniffer_thread = sniffer(cook)
+    sniffer_thread = iModule.sniffer(cook)
     try:
         sniffer_thread.daemon = True
         sniffer_thread.start()
@@ -82,7 +87,7 @@ def start():
         sys.exit()
 
     for i in range(int(sys.argv[2])):
-        t = Scanner()
+        t = iModule.Scanner()
         try:
             t.start()
         except:
@@ -105,13 +110,15 @@ def start():
 
 def cook(pkt):
     try:
-        global lastRecvlastRecv = time.time()
+        global lastRecv
+        lastRecv = time.time()
         if pkt[TCP].flags == 18 and pkt[IP].src not in ip_prompt_queue:
             queue.put(pkt[IP].src)
             print "23 port opened: %s " % (pkt[IP].src)
             ip_prompt_queue.append(pkt[ip].src)
+    except:
+        pass
 
-auth_queue = PriorityQueue()
 
 if __name__ == "__main__":
     if len(sys.argv) != 3:
