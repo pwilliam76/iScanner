@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-#encoding:utf-8
+# encoding:utf-8
 
 import heapq
 import threading
@@ -9,12 +9,14 @@ import Queue
 import iState
 import copy
 
+import utils
+
+
 class SendState:
     def __init__(self):
-        self.exitFlag = 0;
-        self.lastRecv = 0;
+        self.exitFlag = 0
+        self.lastRecv = 0
 
-    
 
 class PriorityQueue:
     def __init__(self):
@@ -28,39 +30,50 @@ class PriorityQueue:
     def pop(self):
         return heapq.heappop(self._queue)[-1]
 
+
 class send_syn(threading.Thread):
     '''send dport=23 package'''
+
     def __init__(self, filename, st):
         threading.Thread.__init__(self)
         self._ip_list = []
-        self.read_ip(self, filename)
+        self.read_ip(filename)
         self.st = st
+        print 'send_sy initialized'
 
     def run(self):
         print "Start to ip splitting"
-        pkt = IP()/TCP(sport = 2222, dport=[23], flags="S")
+        pkt = IP() / TCP(sport=2222, dport=[23], flags="S")
         for ip in self._ip_list:
-            pkt[IP].dst = ip2num(ip)
+            pkt[IP].dst = utils.ip2num(ip)
             try:
-                send(pkt, verbose = 0)
+                send(pkt, verbose=0)
             except:
                 pass
-        st.exitFlag = 1
-    
+        self.st.exitFlag = 1
+
     def read_ip(self, filename):
-        ip_f = open(filename, 'r')
-        for line in ip_f.readlines():
-            self._ip_list.append(line.strip())
+        try:
+            ip_f = open(filename, 'r')
+        except IOError:
+            print "cann't open file %s" % filename
+        else:
+            for line in ip_f.readlines():
+                self._ip_list.append(line.strip())
+            print "read %s lines finished." % filename
+
 
 class sniffer(threading.Thread):
     '''receive sport=2222 package'''
-    def __init(self,callback):
+
+    def __init__(self, callback):
         threading.Thread.__init__(self)
         self._cb = callback
 
-    def run(self, callback):
+    def run(self):
         print "Start to sniffing..."
-        sniff(filter = "tcp and dst port 2222 and src port 23", prn = self._cb)
+        sniff(filter="tcp and dst port 2222 and src port 23", prn=self._cb)
+
 
 class Scanner(threading.Thread):
     def __init__(self):
@@ -92,12 +105,12 @@ class Scanner(threading.Thread):
             else:
                 time.sleep(3)
                 continue
-            
-            #password guessing
-            con = iState.Connection(copy.deepcopy(ip_port), copy.deepcopy(auth_queue))
+
+            # password guessing
+            con = iState.Connection(copy.deepcopy(
+                ip_port), copy.deepcopy(auth_queue))
             while con._state:
                 con.run()
-            
+
             con.exit()
             del con
-            

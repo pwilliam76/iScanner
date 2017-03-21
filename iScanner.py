@@ -1,9 +1,9 @@
 #!/usr/bin/env python
-#encoding:utf-8
+# encoding:utf-8
 
 import pexpect
 import heapq
-import datetime
+from datetime import datetime
 import time
 import Queue
 import sys
@@ -18,62 +18,63 @@ try:
 except ImportError:
     import xml.etree.ElementTree as ET
 
-#this should be a dict
-auth_table = [  ("user","password",10),
-                ("tech","tech",1),
-                ("root","Zte521",2),
-                ("root","xc3511",2),
-                ("root","vizxv",1),
-                ("admin","admin",1),
-                ("root","admin",1),
-                ("root","888888",1),
-                ("root","xmhdipc",1),
-                ("root","juantech",1),
-                ("root","123456",1),
-                ("root","54321",1),
-                ("support","support",1),
-                ("root","",1),
-                ("admin","password",1),
-                ("root","root",1),
-                ("root","root",1),
-                ("user","user",1),
-                ("admin","admin1234",1),
-                ("admin","smcadmin",1),
-                ("root","klv123",1),
-                ("root","klv1234",1),
-                ("root","hi3518",1),
-                ("root","jvbzd",1),
-                ("root","anko",1),
-                ("root","zlxx.",1),
-                ("root","system",1)]
+# this should be a dict
+auth_table = [("user", "password", 10),
+              ("tech", "tech", 1),
+              ("root", "Zte521", 2),
+              ("root", "xc3511", 2),
+              ("root", "vizxv", 1),
+              ("admin", "admin", 1),
+              ("root", "admin", 1),
+              ("root", "888888", 1),
+              ("root", "xmhdipc", 1),
+              ("root", "juantech", 1),
+              ("root", "123456", 1),
+              ("root", "54321", 1),
+              ("support", "support", 1),
+              ("root", "", 1),
+              ("admin", "password", 1),
+              ("root", "root", 1),
+              ("root", "root", 1),
+              ("user", "user", 1),
+              ("admin", "admin1234", 1),
+              ("admin", "smcadmin", 1),
+              ("root", "klv123", 1),
+              ("root", "klv1234", 1),
+              ("root", "hi3518", 1),
+              ("root", "jvbzd", 1),
+              ("root", "anko", 1),
+              ("root", "zlxx.", 1),
+              ("root", "system", 1)]
 
 auth_queue = iModule.PriorityQueue()
-ip_prompt_queue = deque(maxlen = 100)
+ip_prompt_queue = deque(maxlen=100)
 queue = Queue.Queue()
 
-def ip2num(ip, bigendian = True):
-    ip = [int(x) for x in ip.split('.')]
-    return ip[0] << 24 | ip[1] << 16 | ip[2] << 8 | ip[3] & 0xffffffff
 
-def num2ip(num, bigendian = True):
-    return '%s.%s.%s.%s' % ((num >> 24) & 0xff, (num >> 16) & 0xff, (num >> 8) & 0xff, num & 0xff)
+def cook(pkt):
+    try:
+        global lastRecv
+        lastRecv = time.time()
+        if pkt[TCP].flags == 18 and pkt[IP].src not in ip_prompt_queue:
+            queue.put(pkt[IP].src)
+            print "23 port opened: %s " % (pkt[IP].src)
+            ip_prompt_queue.append(pkt[ip].src)
+    except:
+        pass
 
-def choose_ip(ip_pair):
-    if len(ip_pair) > 0:
-        return choice(ip_pair)
-    else:
-        return None
 
 def start():
     '''Init threads'''
     scanner_list = []
     start_time = datetime.now()
-    send_syn_thread = iModule.send_syn(sys.argv[1])
     state = iModule.SendState()
+    send_syn_thread = iModule.send_syn(sys.argv[1], state)
+
     try:
-        send_syn_thread.start(argv[1], state)
+        send_syn_thread.start()
     except:
-        print "[Error] Start ip_split failed!"
+        print "[Error] Start send_syn failed!"
         sys.exit()
 
     sniffer_thread = iModule.sniffer(cook)
@@ -99,21 +100,10 @@ def start():
         elif state.exitFlag == 3:
             end_time = datetime.now()
             print "iScanner completes..."
-            print "It totally costs: %d seconds..." % (end_time-start_time).seconds
+            print "It totally costs: %d seconds..." % (end_time - start_time).seconds
             break
-        
-        sys.exit(1)
 
-def cook(pkt):
-    try:
-        global lastRecv
-        lastRecv = time.time()
-        if pkt[TCP].flags == 18 and pkt[IP].src not in ip_prompt_queue:
-            queue.put(pkt[IP].src)
-            print "23 port opened: %s " % (pkt[IP].src)
-            ip_prompt_queue.append(pkt[ip].src)
-    except:
-        pass
+        sys.exit(1)
 
 
 if __name__ == "__main__":
@@ -121,8 +111,8 @@ if __name__ == "__main__":
         print "usage: iScanner.py ip_filename thread_number"
         print "example :iScanner.py ip_filename 20"
         sys.exit(1)
-    
+
     for item in auth_table:
         auth_queue.push(item[0:2], item[-1])
-        
-    Start()
+
+    start()
