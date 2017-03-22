@@ -51,7 +51,6 @@ auth_queue = iModule.PriorityQueue()
 ip_prompt_queue = deque(maxlen=100)
 queue = Queue.Queue()
 
-
 def cook(pkt):
     try:
         global lastRecv
@@ -86,12 +85,12 @@ def start():
         sys.exit()
 
     for i in range(int(sys.argv[2])):
-        t = iModule.Scanner(state)
+        t = iModule.Scanner(queue, state, auth_queue)
         try:
             t.start()
         except:
             pass
-        scanner_list.appent(t)
+        scanner_list.append(t)
 
     while True:
         time.sleep(1)

