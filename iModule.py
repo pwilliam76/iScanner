@@ -6,6 +6,7 @@ import threading
 from scapy.all import *
 import pexpect
 import Queue
+import sys
 import iState
 import copy
 
@@ -14,9 +15,8 @@ import utils
 
 class SendState:
     def __init__(self):
-        self.exitFlag = 0
-        self.lastRecv = 0
-
+        self.exitLock = threading.Lock()
+        self.exitFlag = []
 
 class PriorityQueue:
     def __init__(self):
@@ -75,42 +75,49 @@ class sniffer(threading.Thread):
         sniff(filter="tcp and dst port 22222 and src port 23", prn=self._cb)
 
 
+
 class Scanner(threading.Thread):
-    def __init__(self, q, st, aq):
+    def __init__(self, q, st, aq, i):
         threading.Thread.__init__(self)
         self.queue = q
         self.queue_locker = threading.Lock()
         self.st = st
-        self.authqueue = aq
+        self.auth_queue = aq
+        self.index = i
+        self.log_file = None
 
     def run(self):
         print "starting scanner threading..."
+        try:
+            self.log_file = open("log/telnet-%d" % self.index, "w")
+        except:
+            self.log_file = sys.stdout
+
         while True:
             ip_port = None
             self.queue_locker.acquire()
-            if self.queue.empty() and self.st.exitFlag == 2 or self.st.exitFlag == 3:
-                self.queueLocker.release()
-                self.st.exitFlag = 3
-                break
-            elif self.queue.empty():
+            if self.queue.empty():
                 self.queue_locker.release()
-                time.sleep(3)
-                continue
+                self.st.exitLock.acquire()
+                self.st.exitFlag[self.index] = 1
+                self.st.exitLock.release()
+                
+                if self.log_file != sys.stdout:
+                    self.log_file.close()
+                break
             try:
                 ip_port = self.queue.get(block=False)
             except:
                 pass
             self.queue_locker.release()
-            if ip_port:
-                pass
-            else:
-                time.sleep(3)
-                continue
 
             # password guessing
-            con = iState.Connection(copy.deepcopy(ip_port), copy.deepcopy(self.auth_queue))
+            con = iState.Connection(copy.deepcopy(ip_port), copy.deepcopy(self.auth_queue), self.log_file)
             while con._state:
                 con.run()
+            
+            self.log_file.write("\r\n!#*************************************#!")
+            self.log_file.write("\r\n\r\n")
 
             con.exit()
             del con
