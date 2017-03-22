@@ -30,6 +30,12 @@ class PriorityQueue:
     def pop(self):
         return heapq.heappop(self._queue)[-1]
 
+    def empty(self):
+        if len(self._queue):
+            return False
+        else:
+            return True
+
 
 class send_syn(threading.Thread):
     '''send dport=23 package'''
@@ -94,7 +100,7 @@ class Scanner(threading.Thread):
             self.log_file = sys.stdout
 
         while True:
-            ip_port = None
+            ip = None
             self.queue_locker.acquire()
             if self.queue.empty():
                 self.queue_locker.release()
@@ -106,17 +112,18 @@ class Scanner(threading.Thread):
                     self.log_file.close()
                 break
             try:
-                ip_port = self.queue.get(block=False)
+                ip = self.queue.get(block=False)
             except:
                 pass
             self.queue_locker.release()
-
+            
+            self.log_file.write("\r\n#!*********** %s **********!#\r\n" % ip)
             # password guessing
-            con = iState.Connection(copy.deepcopy(ip_port), copy.deepcopy(self.auth_queue), self.log_file)
-            while con._state:
+            con = iState.Connection(copy.deepcopy(ip), copy.deepcopy(self.auth_queue), self.log_file)
+            while not con.bQuit:
                 con.run()
             
-            self.log_file.write("\r\n!#*************************************#!")
+            self.log_file.write("\r\n\r\n!#*************************************#!")
             self.log_file.write("\r\n\r\n")
 
             con.exit()

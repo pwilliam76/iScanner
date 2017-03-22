@@ -4,44 +4,45 @@
 !_TAG_PROGRAM_NAME	Exuberant Ctags	//
 !_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
 !_TAG_PROGRAM_VERSION	5.9~svn20110310	//
-Connection	../iState.py	/^class Connection:$/;"	kind:class	line:8
-PriorityQueue	../iModule.py	/^class PriorityQueue:$/;"	kind:class	line:19
-Scanner	../iModule.py	/^class Scanner(threading.Thread):$/;"	kind:class	line:71
-SendState	../iModule.py	/^class SendState:$/;"	kind:class	line:12
-__init	../iModule.py	/^    def __init(self,callback):$/;"	kind:member	line:63
-__init__	../iModule.py	/^    def __init__(self):$/;"	kind:member	line:13
-__init__	../iModule.py	/^    def __init__(self):$/;"	kind:member	line:20
-__init__	../iModule.py	/^    def __init__(self):$/;"	kind:member	line:72
-__init__	../iModule.py	/^    def __init__(self, filename, st):$/;"	kind:member	line:33
-__init__	../iState.py	/^    def __init__(self, ip, auth_queue):$/;"	kind:member	line:9
-_run	../iState.py	/^    def _run(conn):$/;"	kind:member	line:29
-_run	../iState.py	/^    def _run(conn):$/;"	kind:member	line:43
-_run	../iState.py	/^    def _run(conn):$/;"	kind:member	line:62
-_run	../iState.py	/^    def _run(conn):$/;"	kind:member	line:80
-auth_queue	../iScanner.py	/^auth_queue = iModule.PriorityQueue()$/;"	kind:variable	line:50
-auth_table	../iScanner.py	/^auth_table = [  ("user","password",10),$/;"	kind:variable	line:22
-choose_ip	../iScanner.py	/^def choose_ip(ip_pair):$/;"	kind:function	line:61
-confirm_state	../iState.py	/^class confirm_state:$/;"	kind:class	line:78
-conn_state	../iState.py	/^class conn_state:$/;"	kind:class	line:27
-cook	../iScanner.py	/^def cook(pkt):$/;"	kind:function	line:108
-exit	../iState.py	/^    def exit(self):$/;"	kind:member	line:23
+Connection	../iState.py	/^class Connection:$/;"	kind:class	line:9
+PriorityQueue	../iModule.py	/^class PriorityQueue:$/;"	kind:class	line:21
+Scanner	../iModule.py	/^class Scanner(threading.Thread):$/;"	kind:class	line:79
+SendState	../iModule.py	/^class SendState:$/;"	kind:class	line:16
+__init__	../iModule.py	/^    def __init__(self):$/;"	kind:member	line:17
+__init__	../iModule.py	/^    def __init__(self):$/;"	kind:member	line:22
+__init__	../iModule.py	/^    def __init__(self, callback):$/;"	kind:member	line:69
+__init__	../iModule.py	/^    def __init__(self, filename, st):$/;"	kind:member	line:37
+__init__	../iModule.py	/^    def __init__(self, q, st, aq, i):$/;"	kind:member	line:80
+__init__	../iState.py	/^    def __init__(self, ip, auth_queue, handle):$/;"	kind:member	line:10
+_run	../iState.py	/^    def _run(conn):$/;"	kind:member	line:31
+_run	../iState.py	/^    def _run(conn):$/;"	kind:member	line:49
+_run	../iState.py	/^    def _run(conn):$/;"	kind:member	line:70
+_run	../iState.py	/^    def _run(conn):$/;"	kind:member	line:90
+auth_queue	../iScanner.py	/^auth_queue = iModule.PriorityQueue()$/;"	kind:variable	line:17
+confirm_state	../iState.py	/^class confirm_state:$/;"	kind:class	line:88
+conn_state	../iState.py	/^class conn_state:$/;"	kind:class	line:29
+dict_table	../dictionary.py	/^dict_table = [("user", "password", 10),            $/;"	kind:variable	line:4
+dictionary.py	../dictionary.py	1;"	kind:file	line:1
+exit	../iState.py	/^    def exit(self):$/;"	kind:member	line:24
 iModule.py	../iModule.py	1;"	kind:file	line:1
 iScanner.py	../iScanner.py	1;"	kind:file	line:1
 iState.py	../iState.py	1;"	kind:file	line:1
-ip2num	../iScanner.py	/^def ip2num(ip, bigendian = True):$/;"	kind:function	line:54
-ip_prompt_queue	../iScanner.py	/^ip_prompt_queue = deque(maxlen = 100)$/;"	kind:variable	line:51
-new_state	../iState.py	/^    def new_state(self, newstate):$/;"	kind:member	line:17
-num2ip	../iScanner.py	/^def num2ip(num, bigendian = True):$/;"	kind:function	line:58
-passwd_state	../iState.py	/^class passwd_state:$/;"	kind:class	line:60
-pop	../iModule.py	/^    def pop(self):$/;"	kind:member	line:28
-push	../iModule.py	/^    def push(self, pair, priority):$/;"	kind:member	line:24
-queue	../iScanner.py	/^queue = Queue.Queue()$/;"	kind:variable	line:52
-read_ip	../iModule.py	/^    def read_ip(self, filename):$/;"	kind:member	line:51
-run	../iModule.py	/^    def run(self):$/;"	kind:member	line:40
-run	../iModule.py	/^    def run(self):$/;"	kind:member	line:78
-run	../iModule.py	/^    def run(self, callback):$/;"	kind:member	line:67
-run	../iState.py	/^    def run(self):$/;"	kind:member	line:20
-send_syn	../iModule.py	/^class send_syn(threading.Thread):$/;"	kind:class	line:31
-sniffer	../iModule.py	/^class sniffer(threading.Thread):$/;"	kind:class	line:61
-start	../iScanner.py	/^def start():$/;"	kind:function	line:67
-user_state	../iState.py	/^class user_state:$/;"	kind:class	line:41
+ip2num	../utils.py	/^def ip2num(ip, bigendian=True):$/;"	kind:function	line:4
+ip_prompt_queue	../iScanner.py	/^ip_prompt_queue = deque(maxlen=100)$/;"	kind:variable	line:18
+new_state	../iState.py	/^    def new_state(self, newstate):$/;"	kind:member	line:18
+num2ip	../utils.py	/^def num2ip(num, bigendian=True):$/;"	kind:function	line:9
+passwd_state	../iState.py	/^class passwd_state:$/;"	kind:class	line:68
+pop	../iModule.py	/^    def pop(self):$/;"	kind:member	line:30
+push	../iModule.py	/^    def push(self, pair, priority):$/;"	kind:member	line:26
+queue	../iScanner.py	/^queue = Queue.Queue()$/;"	kind:variable	line:19
+read_ip	../iModule.py	/^    def read_ip(self, filename):$/;"	kind:member	line:55
+read_ip	../iScanner.py	/^def read_ip(filename):$/;"	kind:function	line:21
+run	../iModule.py	/^    def run(self):$/;"	kind:member	line:44
+run	../iModule.py	/^    def run(self):$/;"	kind:member	line:73
+run	../iModule.py	/^    def run(self):$/;"	kind:member	line:89
+run	../iState.py	/^    def run(self):$/;"	kind:member	line:21
+send_syn	../iModule.py	/^class send_syn(threading.Thread):$/;"	kind:class	line:34
+sniffer	../iModule.py	/^class sniffer(threading.Thread):$/;"	kind:class	line:66
+start	../iScanner.py	/^def start():$/;"	kind:function	line:31
+user_state	../iState.py	/^class user_state:$/;"	kind:class	line:47
+utils.py	../utils.py	1;"	kind:file	line:1
