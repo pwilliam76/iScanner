@@ -45,7 +45,7 @@ class send_syn(threading.Thread):
         print "Start to ip splitting"
         pkt = IP()/TCP(sport=22222, dport=[23], flags="S")
         for ip in self._ip_list:
-            pkt[IP].dst = utils.num2ip(ip)
+            pkt[IP].dst = ip
             try:
                 send(pkt, verbose=0)
             except:
@@ -64,7 +64,7 @@ class send_syn(threading.Thread):
 
 
 class sniffer(threading.Thread):
-    '''receive sport=2222 package'''
+    '''receive sport=22222 package'''
 
     def __init__(self, callback):
         threading.Thread.__init__(self)
@@ -72,7 +72,7 @@ class sniffer(threading.Thread):
 
     def run(self):
         print "Start to sniffing..."
-        sniff(filter="tcp and dst port 2222 and src port 23", prn=self._cb)
+        sniff(filter="tcp and dst port 22222 and src port 23", prn=self._cb)
 
 
 class Scanner(threading.Thread):
@@ -90,7 +90,7 @@ class Scanner(threading.Thread):
             self.queue_locker.acquire()
             if self.queue.empty() and self.st.exitFlag == 2 or self.st.exitFlag == 3:
                 self.queueLocker.release()
-                st.exitFlag = 3
+                self.st.exitFlag = 3
                 break
             elif self.queue.empty():
                 self.queue_locker.release()
@@ -108,8 +108,7 @@ class Scanner(threading.Thread):
                 continue
 
             # password guessing
-            con = iState.Connection(copy.deepcopy(
-                ip_port), copy.deepcopy(auth_queue))
+            con = iState.Connection(copy.deepcopy(ip_port), copy.deepcopy(self.auth_queue))
             while con._state:
                 con.run()
 
