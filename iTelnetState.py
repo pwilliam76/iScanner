@@ -102,8 +102,8 @@ class confirm_state:
                 conn.bQuit = True
                 return
             print "Got password [%s] %s:%s" % (conn.ip, user, passwd)
-            db = MySQLdb.connect("localhost", "telnet",
-                                 "telnet", "telnet_data", charset="utf8")
+            db = MySQLdb.connect("localhost", "scanner",
+                                 "scanner", "telnet_data", charset="utf8")
             cursor = db.cursor()
             cursor.execute("INSERT INTO auth_table(ip,port,username,password,loc) values('%s','%d','%s','%s','%s')" % (
                 conn.ip, 23, user, passwd, IP.find(conn.ip)))

