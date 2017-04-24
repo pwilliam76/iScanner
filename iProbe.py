@@ -8,15 +8,16 @@ import time
 import Queue
 import sys
 from collections import deque
+import argparse
 
 import iModule
-import iState
-from dictionary import dict_table
+
+from iDict import dict_table
 
 
 auth_queue = iModule.PriorityQueue()
 ip_prompt_queue = deque(maxlen=100)
-queue = Queue.Queue()
+ip_queue = Queue.Queue()
 
 def read_ip(filename):
     try:
@@ -25,23 +26,23 @@ def read_ip(filename):
         print "cann't open file %s" % filename
     else:
         for line in ip_f.readlines():
-            queue.put(line.strip())
+            ip_queue.put(line.strip())
         print "read %s lines finished." % filename
 
-def start():
+def start(args):
     '''Init threads'''
     
     for item in dict_table:
         auth_queue.push(item[0:2],item[-1])
     
-    read_ip(sys.argv[1])
+    read_ip(args.file)
     
     start_time = datetime.now()
     state = iModule.SendState()
     
-    for i in range(int(sys.argv[2])):
+    for i in range(args.thread):
         state.exitFlag.append(0)
-        t = iModule.Scanner(queue, state, auth_queue, i)
+        t = iModule.Probe(ip_queue, state, auth_queue, i, args.proto)
         try:
             t.start()
         except:
@@ -57,7 +58,7 @@ def start():
         state.exitLock.release()
         if count == len(state.exitFlag):
             end_time = datetime.now()
-            print "iScanner completes..."
+            print "iProbe completes..."
             print "It totally costs: %d seconds..." % (end_time - start_time).seconds
             break
         else:
@@ -66,8 +67,11 @@ def start():
 
 
 if __name__ == "__main__":
-    if len(sys.argv) != 3:
-        print "usage: iScanner.py ip_filename thread_number"
-        print "example :iScanner.py ip_filename 20"
-        sys.exit(1)
-    start()
+    parser = argparse.ArgumentParser();
+    parser.add_argument("file", help="IP address list file.")
+    parser.add_argument("proto", help="The protocal to probe weak password.", choices=["telnet", "ssh"])
+    parser.add_argument("dict", help="Word dictionary to probe weak password.")
+    parser.add_argument("-t", "--thread", help="The thread used to scanning.", type=int, default=20)
+    args = parser.parse_args()
+
+    start(args)

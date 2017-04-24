@@ -7,7 +7,8 @@ from scapy.all import *
 import pexpect
 import Queue
 import sys
-import iState
+import iTelnetState
+import iSSHState
 import copy
 
 import utils
@@ -82,8 +83,8 @@ class sniffer(threading.Thread):
 
 
 
-class Scanner(threading.Thread):
-    def __init__(self, q, st, aq, i):
+class Probe(threading.Thread):
+    def __init__(self, q, st, aq, i, proto):
         threading.Thread.__init__(self)
         self.queue = q
         self.queue_locker = threading.Lock()
@@ -91,11 +92,12 @@ class Scanner(threading.Thread):
         self.auth_queue = aq
         self.index = i
         self.log_file = None
+        self.proto = proto
 
     def run(self):
-        print "starting scanner threading..."
+        print "starting probing threading..."
         try:
-            self.log_file = open("log/telnet-%d" % self.index, "w")
+            self.log_file = open("log/%s-%d" % (self.proto, self.index), "w")
         except:
             self.log_file = sys.stdout
 
@@ -119,7 +121,12 @@ class Scanner(threading.Thread):
             
             self.log_file.write("\r\n#!*********** %s **********!#\r\n" % ip)
             # password guessing
-            con = iState.Connection(copy.deepcopy(ip), copy.deepcopy(self.auth_queue), self.log_file)
+            if(self.proto == "telnet"):
+                con = iTelnetState.Connection(copy.deepcopy(ip), copy.deepcopy(self.auth_queue), self.log_file)
+            elif(self.proto == "ssh"):
+                con = iSSHState.Connection(copy.deepcopy(ip), copy.deepcopy(self.auth_queue), self.log_file)
+            else:
+                pass
             while not con.bQuit:
                 con.run()
             
