@@ -70,7 +70,6 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser();
     parser.add_argument("file", help="IP address list file.")
     parser.add_argument("proto", help="The protocal to probe weak password.", choices=["telnet", "ssh"])
-    parser.add_argument("dict", help="Word dictionary to probe weak password.")
     parser.add_argument("-t", "--thread", help="The thread used to scanning.", type=int, default=20)
     args = parser.parse_args()
 
