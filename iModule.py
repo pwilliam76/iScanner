@@ -31,7 +31,7 @@ class PriorityQueue:
         return heapq.heappop(self._queue)[-1]
 
 
-class send_syn(threading.Thread):
+class Send_syn(threading.Thread):
     '''send dport=23 package'''
 
     def __init__(self, filename, st):
@@ -63,7 +63,7 @@ class send_syn(threading.Thread):
             print "read %s lines finished." % filename
 
 
-class sniffer(threading.Thread):
+class Sniffer(threading.Thread):
     '''receive sport=22222 package'''
 
     def __init__(self, callback):

@@ -55,13 +55,12 @@ def cook(pkt):
     try:
         global lastRecv
         lastRecv = time.time()
-        if pkt[TCP].flags == 18 and pkt[IP].src not in ip_prompt_queue:
+        if pkt[TCP].flags == 17 and pkt[IP].src not in ip_prompt_queue:
             queue.put(pkt[IP].src)
             print "23 port opened: %s " % (pkt[IP].src)
             ip_prompt_queue.append(pkt[ip].src)
     except:
         pass
-
 
 def start():
     '''Init threads'''
@@ -76,7 +75,7 @@ def start():
         print "[Error] Start send_syn failed!"
         sys.exit()
 
-    sniffer_thread = iModule.sniffer(cook)
+    sniffer_thread = iModule.Sniffer(cook)
     try:
         sniffer_thread.daemon = True
         sniffer_thread.start()
