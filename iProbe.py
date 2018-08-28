@@ -38,9 +38,6 @@ def start(args):
                 l = line.split()
                 auth_queue.push(l[1:3], 1)
                 ip_queue.put(l[0].strip())
-                if args.verbose:
-                    print (l)
-                    print ("\n")
     else:
         for item in dict_table:
             auth_queue.push(item[0:2],item[-1])
