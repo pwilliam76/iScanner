@@ -5,7 +5,6 @@ import heapq
 import threading
 from scapy.all import *
 import pexpect
-import Queue
 import sys
 import iTelnetState
 import iSSHState
@@ -46,10 +45,10 @@ class send_syn(threading.Thread):
         self._ip_list = []
         self.read_ip(filename)
         self.st = st
-        print 'send_sy initialized'
+        print('send_sy initialized')
 
     def run(self):
-        print "Start to ip splitting"
+        print("Start to ip splitting")
         pkt = IP()/TCP(sport=22222, dport=[23], flags="S")
         for ip in self._ip_list:
             pkt[IP].dst = ip
@@ -63,11 +62,11 @@ class send_syn(threading.Thread):
         try:
             ip_f = open(filename, 'r')
         except IOError:
-            print "cann't open file %s" % filename
+            print("cann't open file %s" % filename)
         else:
             for line in ip_f.readlines():
                 self._ip_list.append(line.strip())
-            print "read %s lines finished." % filename
+            print("read %s lines finished." % filename)
 
 
 class sniffer(threading.Thread):
@@ -78,7 +77,7 @@ class sniffer(threading.Thread):
         self._cb = callback
 
     def run(self):
-        print "Start to sniffing..."
+        print("Start to sniffing...")
         sniff(filter="tcp and dst port 22222 and src port 23", prn=self._cb)
 
 
@@ -95,7 +94,7 @@ class Probe(threading.Thread):
         self.proto = proto
 
     def run(self):
-        print "starting probing threading..."
+        print("starting probing threading...")
         try:
             self.log_file = open("log/%s-%d" % (self.proto, self.index), "w")
         except:

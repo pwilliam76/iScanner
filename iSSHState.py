@@ -1,6 +1,5 @@
 import pexpect
 import MySQLdb
-#import IP
 import time
 
 from pexpect import ExceptionPexpect, TIMEOUT, EOF
@@ -265,10 +264,10 @@ class Connection:
         try:
             user, pwd = self.auth_queue.pop()
             self.login(self.ip, user, pwd)
-            print "Got password [%s] %s:%s" % (self.ip, user, pwd)
+            print("Got password [%s] %s:%s" % (self.ip, user, pwd))
             self.write_to_db(self.ip, user, pwd)
             self.logout() 
-        except ExceptionSSH, e:  
+        except ExceptionSSH as e:  
             self.hLog.write("ssh failed on login. error is: %s \n" % str(e))
             self.exit()
         except IndexError:
@@ -278,12 +277,12 @@ class Connection:
     def write_to_db(self, ip, user, pwd):
         try:
             db = MySQLdb.connect("localhost", "scanner",
-                                 "scanner", "ssh_data", charset="utf8")
+                                 "scanner", "scanner", charset="utf8")
             cursor = db.cursor()
-            cursor.execute("INSERT INTO auth_table(ip,port,username,password,loc) values('%s','%d','%s','%s','%s')" % (
-                ip, 22, user, passwd, IP.find(ip)))
+            cursor.execute("INSERT INTO auth_table(ip,port,username,password, loc) values('%s','%d','%s','%s','%s')" % (
+                ip, 22, user, passwd, '' ))
             db.commit()
-            print "[report] One result import to database"
+            print("[report] One result import to database")
         except:
             db.rollback()
         self.bQuit = True
@@ -369,14 +368,14 @@ class confirm_state:
             if conn.auth == ("user", "password"):
                 conn.bQuit = True
                 return
-            print "Got password [%s] %s:%s" % (conn.ip, user, passwd)
+            print("Got password [%s] %s:%s" % (conn.ip, user, passwd))
             db = MySQLdb.connect("localhost", "telnet",
                                  "telnet", "telnet_data", charset="utf8")
             cursor = db.cursor()
             cursor.execute("INSERT INTO auth_table(ip,port,username,password,loc) values('%s','%d','%s','%s','%s')" % (
-                conn.ip, 23, user, passwd, IP.find(conn.ip)))
+                conn.ip, 23, user, passwd, ""))
             db.commit()
-            print "[report] One result import to database"
+            print("[report] One result import to database")
         except:
             db.rollback()
         conn.bQuit = True

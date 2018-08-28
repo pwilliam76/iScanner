@@ -5,7 +5,7 @@ import pexpect
 import heapq
 from datetime import datetime
 import time
-import Queue
+import queue
 import sys
 from collections import deque
 import argparse
@@ -17,17 +17,17 @@ from iDict import dict_table
 
 auth_queue = iModule.PriorityQueue()
 ip_prompt_queue = deque(maxlen=100)
-ip_queue = Queue.Queue()
+ip_queue = queue.Queue()
 
 def read_ip(filename):
     try:
         ip_f = open(filename, 'r')
     except IOError:
-        print "cann't open file %s" % filename
+        print ("cann't open file %s" % filename)
     else:
         for line in ip_f.readlines():
             ip_queue.put(line.strip())
-        print "read %s lines finished." % filename
+        print ("read %s lines finished." % filename)
 
 def start(args):
     '''Init threads'''
@@ -67,8 +67,8 @@ def start(args):
         state.exitLock.release()
         if count == len(state.exitFlag):
             end_time = datetime.now()
-            print "iProbe completes..."
-            print "It totally costs: %d seconds..." % (end_time - start_time).seconds
+            print("iProbe completes...")
+            print("It totally costs: %d seconds..." % (end_time - start_time).seconds)
             break
         else:
             continue
