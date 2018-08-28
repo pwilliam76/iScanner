@@ -1,6 +1,6 @@
 import pexpect
 import MySQLdb
-import IP
+#import IP
 import time
 
 from pexpect import ExceptionPexpect, TIMEOUT, EOF

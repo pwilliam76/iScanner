@@ -3,7 +3,7 @@
 
 import pexpect
 import MySQLdb
-import IP
+#import IP
 
 
 class Connection:

@@ -31,11 +31,20 @@ def read_ip(filename):
 
 def start(args):
     '''Init threads'''
-    
-    for item in dict_table:
-        auth_queue.push(item[0:2],item[-1])
-    
-    read_ip(args.file)
+   
+    if args.hydra is not None:
+        with open(args.hydra, 'r')as h_f:
+            for line in h_f:
+                l = line.split()
+                auth_queue.push(l[1:3], 1)
+                ip_queue.put(l[0].strip())
+                if args.verbose:
+                    print (l)
+                    print ("\n")
+    else:
+        for item in dict_table:
+            auth_queue.push(item[0:2],item[-1])
+        read_ip(args.file)
     
     start_time = datetime.now()
     state = iModule.SendState()
@@ -68,9 +77,11 @@ def start(args):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser();
-    parser.add_argument("file", help="IP address list file.")
+#    parser.add_argument("file", help="IP address list file.")
     parser.add_argument("proto", help="The protocal to probe weak password.", choices=["telnet", "ssh"])
     parser.add_argument("-t", "--thread", help="The thread used to scanning.", type=int, default=20)
+    parser.add_argument("-H", "--hydra", help="the hydra testing file.")
+    parser.add_argument("-v", "--verbose", help="print the debug info.", type=bool, default=False)
     args = parser.parse_args()
 
     start(args)
